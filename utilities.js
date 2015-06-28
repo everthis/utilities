@@ -147,6 +147,32 @@
             };
         };
 
+        // fn will be executed on the leading edge.
+        utils.throttle = function(fn, threshhold, scope) {
+          if (!threshhold) {
+            threshhold = 250;
+          };
+          var last,
+              deferTimer;
+          return function () {
+            var context = scope || this;
+
+            var now = +new Date,
+                args = arguments;
+            if (last && now < last + threshhold) {
+              // hold on to it
+              clearTimeout(deferTimer);
+              deferTimer = setTimeout(function () {
+                last = now;
+                fn.apply(context, args);
+              }, threshhold);
+            } else {
+              last = now;
+              fn.apply(context, args);
+            }
+          };
+        };
+
         /**
          * the pubsub is a publisher/subscriber system to demonstrate
          * use of Function.call and Function.apply.
