@@ -104,29 +104,26 @@
                 return fn.apply(this, args.concat(slice.call(arguments)));
             };
         };
-
         utils.curry_bind = function(fn, that) {
-          var slice = [].slice,
-              args = slice.call(arguments, 2);
-          return function () {
-            return fn.apply(that, args.concat(slice.call(arguments)));
-          };
-        };
-
-        // http://ejohn.org/blog/partial-functions-in-javascript/
-        utils.partial = function(fn){
-            var args = Array.prototype.slice.call(arguments, 1);
-            return function(){
-              var arg = 0;
-              for ( var i = 0; i < args.length && arg < arguments.length; i++ ) {
-                if ( args[i] === undefined ) {
-                  args[i] = arguments[arg++];
-                };
-              };
-              return fn.apply(this, args);
+            var slice = [].slice,
+                args = slice.call(arguments, 2);
+            return function() {
+                return fn.apply(that, args.concat(slice.call(arguments)));
             };
-          };
-        
+        };
+        // http://ejohn.org/blog/partial-functions-in-javascript/
+        utils.partial = function(fn) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            return function() {
+                var arg = 0;
+                for (var i = 0; i < args.length && arg < arguments.length; i++) {
+                    if (args[i] === undefined) {
+                        args[i] = arguments[arg++];
+                    };
+                };
+                return fn.apply(this, args);
+            };
+        };
         // Returns a function, that, as long as it continues to be invoked, will not
         // be triggered. The function will be called after it stops being called for
         // N milliseconds. If `immediate` is passed, trigger the function on the
@@ -146,97 +143,97 @@
                 if (callNow) func.apply(context, args);
             };
         };
-
         // fn will be executed on the leading edge.
         utils.throttle = function(fn, threshhold, scope) {
-          if (!threshhold) {
-            threshhold = 250;
-          };
-          var last,
-              deferTimer;
-          return function () {
-            var context = scope || this;
-
-            var now = +new Date,
-                args = arguments;
-            if (last && now < last + threshhold) {
-              // hold on to it
-              clearTimeout(deferTimer);
-              deferTimer = setTimeout(function () {
-                last = now;
-                fn.apply(context, args);
-              }, threshhold);
-            } else {
-              last = now;
-              fn.apply(context, args);
-            }
-          };
+            if (!threshhold) {
+                threshhold = 250;
+            };
+            var last,
+                deferTimer;
+            return function() {
+                var context = scope || this;
+                var now = +new Date,
+                    args = arguments;
+                if (last && now < last + threshhold) {
+                    // hold on to it
+                    clearTimeout(deferTimer);
+                    deferTimer = setTimeout(function() {
+                        last = now;
+                        fn.apply(context, args);
+                    }, threshhold);
+                } else {
+                    last = now;
+                    fn.apply(context, args);
+                }
+            };
         };
+        // get query object from href
+        utils.parseQueryString = function() {
+            var str = window.location.search;
+            var objURL = {};
+            str.replace(new RegExp("([^?=&]+)(=([^&]*))?", "g"), function($0, $1, $2, $3) {
+                objURL[$1] = $3;
+            });
+            return objURL;
+        };
+
 
         /**
          * the pubsub is a publisher/subscriber system to demonstrate
          * use of Function.call and Function.apply.
          * http://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
          */
-
         var pubsub = {};
-
         /**
          * pubsub.subscribers is an object where each key is an event
          * and each value is an array of callback functions associated
          * with a particular event.
          */
         pubsub.subscribers = {
-          'some_event': [
-            function () { console.log("some_event occured!"); }
-          ]
-        };
+            'some_event': [
 
+                function() {
+                    console.log("some_event occured!");
+                }
+            ]
+        };
         /**
          * pubsub.publish calls all the callbacks associated with a
          * particular event (the first argument), passing each callback
          * any further arguments supplied to publish.
          */
-
-        pubsub.publish = function () {
-          // arguments is not an array.
-          // use `[].slice.call` to turn it into a proper one.
-          // See: http://s.phuu.net/SiRS7W
-          var args = [].slice.call(arguments, 0);
-
-          // pull the event off the front of the array of arguments.
-          var event = args.shift();
-
-          // If we have no subscribers to this event, initialise it.
-          // Note, we could just return here.
-          if( !pubsub.subscribers[event] ) pubsub.subscribers[event] = [];
-
-          // Run through all the subscriber callbacks to the event and
-          // fire them using `apply`. This runs the cb with a set of
-          // arguments from the args array.
-          // See: http://s.phuu.net/SiSkTC
-          pubsub.subscribers[event].forEach(function (cb) {
-            cb.apply(this, args);
-          });
+        pubsub.publish = function() {
+            // arguments is not an array.
+            // use `[].slice.call` to turn it into a proper one.
+            // See: http://s.phuu.net/SiRS7W
+            var args = [].slice.call(arguments, 0);
+            // pull the event off the front of the array of arguments.
+            var event = args.shift();
+            // If we have no subscribers to this event, initialise it.
+            // Note, we could just return here.
+            if (!pubsub.subscribers[event]) pubsub.subscribers[event] = [];
+            // Run through all the subscriber callbacks to the event and
+            // fire them using `apply`. This runs the cb with a set of
+            // arguments from the args array.
+            // See: http://s.phuu.net/SiSkTC
+            pubsub.subscribers[event].forEach(function(cb) {
+                cb.apply(this, args);
+            });
         };
-
         /**
          * pubsub.subscribe adds a callback an event's list
          */
-
-        pubsub.subscribe = function (event, cb) {
-          // first, if this is a new event, set up a new list in the
-          // subscribers object.
-          if( !pubsub.subscribers[event] ) {
-            pubsub.subscribers[event] = [];
-          }
-          // next, push the supplied callback into the list to be
-          // called when the object is published
-          pubsub.subscribers[event].push(cb);
+        pubsub.subscribe = function(event, cb) {
+            // first, if this is a new event, set up a new list in the
+            // subscribers object.
+            if (!pubsub.subscribers[event]) {
+                pubsub.subscribers[event] = [];
+            }
+            // next, push the supplied callback into the list to be
+            // called when the object is published
+            pubsub.subscribers[event].push(cb);
         };
-
         utils.pubsub = pubsub;
-
         return utils;
     }
     // Export US.
